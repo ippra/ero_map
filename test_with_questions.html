@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>ERO Map Preview</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Single light look, so the map colors stay exactly what a respondent would see.
+   Layout: one column the width of the survey map, controls above it. */
+:root{--bg:#ffffff;--fg:#1f2933;--muted:#52606d;--line:#cbd2d9;--accent:#0b5c8a;--chip:#eef3f7}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 Arial,Helvetica,sans-serif;padding-block:20px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:642px;margin:0 auto;display:grid;gap:16px}
+main>*{min-width:0}
+h1{font-size:22px;margin:0 0 4px;text-wrap:balance}
+p{margin:0}
+.intro{color:var(--muted)}
+form{display:flex;flex-wrap:wrap;gap:12px;align-items:end}
+label{display:grid;gap:4px;font-size:14px;font-weight:700}
+input,select{font:inherit;font-weight:400;padding:7px 9px;border:1px solid #7b8794;border-radius:3px;background:#fff;color:var(--fg);box-sizing:border-box;max-width:100%}
+#zip{width:6.5em}
+button{font:inherit;cursor:pointer;border-radius:3px}
+#show{background:var(--accent);color:#fff;border:1px solid var(--accent);padding:7px 16px;font-weight:700}
+.check{display:flex;gap:6px;align-items:center;font-weight:400;padding-bottom:8px}
+.check input{margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px}
+.chips button{background:var(--chip);color:var(--fg);border:1px solid var(--line);padding:4px 9px;font-size:14px}
+.chips button:hover{border-color:var(--accent)}
+.questions{display:grid;gap:14px;border-top:1px solid var(--line);padding-top:16px}
+h2{font-size:19px;margin:0;text-wrap:balance}
+fieldset{border:1px solid var(--line);border-radius:3px;margin:0;padding:12px 14px;display:grid;gap:6px;min-width:0}
+legend{font-weight:700;padding:0 6px}
+.opt{display:flex;gap:8px;align-items:flex-start;font-size:15px;font-weight:400;cursor:pointer}
+.opt input{margin:4px 0 0;flex:none}
+.pagebreak{font-size:14px;font-weight:700;color:var(--muted);border-top:2px dashed var(--line);padding-top:12px}
+.note{font-size:13px;color:var(--muted);margin-top:6px;border-top:1px solid var(--line);padding-top:6px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+</style>
+</head><body>
+<main>
+<div><h1>ERO map preview</h1></div>
+<form id="controls">
+<label for="zip">ZIP code<input id="zip" value="10001" inputmode="numeric" maxlength="10" autocomplete="off"></label>
+<label for="condition">Map detail randomization<select id="condition"><option value="minimal">1. Minimal: state lines and coast</option><option value="cities">2. Adds city names</option><option value="roads">3. Adds highways and route numbers</option><option value="full" selected>4. Adds cities and highways</option></select></label>
+<label for="marker" class="check"><input id="marker" type="checkbox">Show ZIP-safe circle (researcher check)</label>
+<button id="show" type="submit">Show map</button>
+</form>
+<div class="chips" id="chips"><span>Try:</span></div>
+<div id="map"></div>
+<section class="questions" aria-label="Survey questions">
+<fieldset><legend>1. Based on this map, what is the risk of flash flooding where you live?</legend>
+<label class="opt" for="q1o0"><input type="radio" id="q1o0" name="q1"><span>Not in a risk area</span></label>
+<label class="opt" for="q1o1"><input type="radio" id="q1o1" name="q1"><span>Marginal (Level 1)</span></label>
+<label class="opt" for="q1o2"><input type="radio" id="q1o2" name="q1"><span>Slight (Level 2)</span></label>
+<label class="opt" for="q1o3"><input type="radio" id="q1o3" name="q1"><span>Enhanced (Level 3)</span></label>
+<label class="opt" for="q1o4"><input type="radio" id="q1o4" name="q1"><span>Moderate (Level 4)</span></label>
+<label class="opt" for="q1o5"><input type="radio" id="q1o5" name="q1"><span>High (Level 5)</span></label>
+<label class="opt" for="q1o6"><input type="radio" id="q1o6" name="q1"><span>Not sure</span></label>
+<p class="note">Main outcome. Slight (Level 2) is correct when the whole ZIP fits.</p></fieldset>
+<fieldset><legend>2. How confident are you in your answer to the previous question?</legend>
+<label class="opt" for="q2o0"><input type="radio" id="q2o0" name="q2"><span>Not at all confident</span></label>
+<label class="opt" for="q2o1"><input type="radio" id="q2o1" name="q2"><span>Slightly confident</span></label>
+<label class="opt" for="q2o2"><input type="radio" id="q2o2" name="q2"><span>Moderately confident</span></label>
+<label class="opt" for="q2o3"><input type="radio" id="q2o3" name="q2"><span>Very confident</span></label>
+<label class="opt" for="q2o4"><input type="radio" id="q2o4" name="q2"><span>Extremely confident</span></label>
+<p class="note">Shows whether added detail increases confidence, even when accuracy is the same.</p></fieldset>
+<p class="pagebreak">The questions below appear on a separate page, with the same map shown again.</p>
+<div id="map2"></div>
+<fieldset><legend>3. How easy or difficult was it to find where you live on this map?</legend>
+<label class="opt" for="q3o0"><input type="radio" id="q3o0" name="q3"><span>Very difficult</span></label>
+<label class="opt" for="q3o1"><input type="radio" id="q3o1" name="q3"><span>Somewhat difficult</span></label>
+<label class="opt" for="q3o2"><input type="radio" id="q3o2" name="q3"><span>Neither easy nor difficult</span></label>
+<label class="opt" for="q3o3"><input type="radio" id="q3o3" name="q3"><span>Somewhat easy</span></label>
+<label class="opt" for="q3o4"><input type="radio" id="q3o4" name="q3"><span>Very easy</span></label>
+<p class="note">Direct measure of self-location. Compare across the map-detail conditions.</p></fieldset>
+<fieldset data-show="cities full"><legend>4. Do you see the name of your city or town on the map?</legend>
+<label class="opt" for="q4o0"><input type="radio" id="q4o0" name="q4"><span>Yes, my city or town</span></label>
+<label class="opt" for="q4o1"><input type="radio" id="q4o1" name="q4"><span>No, but I see a nearby city or town I know</span></label>
+<label class="opt" for="q4o2"><input type="radio" id="q4o2" name="q4"><span>No</span></label>
+<p class="note">Shown in the Cities and Full conditions.</p></fieldset>
+<fieldset data-show="roads full"><legend>5. Do you see a highway you recognize near where you live?</legend>
+<label class="opt" for="q5o0"><input type="radio" id="q5o0" name="q5"><span>Yes</span></label>
+<label class="opt" for="q5o1"><input type="radio" id="q5o1" name="q5"><span>No</span></label>
+<label class="opt" for="q5o2"><input type="radio" id="q5o2" name="q5"><span>Not sure</span></label>
+<p class="note">Shown in the Roads and Full conditions.</p></fieldset>
+</section>
+</main>
+<script src="ero-map.js"></script>
+<script>
+(function(){
+  function syncQuestions(){
+    var detail=document.getElementById("condition").value,n=0;
+    Array.prototype.forEach.call(document.querySelectorAll(".questions fieldset"),function(f){
+      var rule=f.getAttribute("data-show");
+      f.hidden=!!rule&&rule.split(" ").indexOf(detail)<0;
+      if(!f.hidden){n++;var l=f.querySelector("legend");l.textContent=n+". "+l.textContent.replace(/^\d+\. /,"");}
+    });
+  }
+  function show(){
+    syncQuestions();
+    document.getElementById("map2").innerHTML="";
+    EROMap.mount(document.getElementById("map"),{
+      zip:document.getElementById("zip").value,
+      detail:document.getElementById("condition").value,
+      showMarker:document.getElementById("marker").checked,
+      onDone:function(r){
+        EROMap.mount(document.getElementById("map2"),{
+          zip:r.zipStatus.indexOf("fallback")===0?"":r.zipUsed,
+          maxRetries:0,
+          detail:document.getElementById("condition").value,
+          showMarker:document.getElementById("marker").checked
+        });
+      }
+    });
+  }
+  var examples=[["Manhattan, NY","10001"],["Chicago, IL","60601"],["Los Angeles, CA","90012"],["Atlanta suburb, GA","30067"],["Dallas, TX","75201"],["Norman, OK","73019"],["Rural Nevada","89049"]];
+  var chips=document.getElementById("chips");
+  examples.forEach(function(e){var b=document.createElement("button");b.type="button";b.textContent=e[0];b.addEventListener("click",function(){document.getElementById("zip").value=e[1];show();});chips.appendChild(b);});
+  document.getElementById("controls").addEventListener("submit",function(ev){ev.preventDefault();show();});
+  ["condition","marker"].forEach(function(id){document.getElementById(id).addEventListener("change",show);});
+  show();
+})();
+</script>
+</body></html>

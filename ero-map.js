@@ -15,18 +15,25 @@
   ];
 
   /* Contour control points, in pixels relative to map center.
-     Listed outermost first and smoothed into closed curves when drawn. */
+     Listed outermost first and smoothed into closed curves when drawn.
+     Moderate is the highest level drawn; the legend still shows all five.
+     Shapes are irregular and off-center so they read as a hand-drawn outlook.
+     Constraints: each level lies inside the one below it, map center is at
+     least SAFE_RADIUS inside Slight and outside Enhanced, and every point is
+     within 240 px of center so the outlook fits the frame at 0 or 90 deg. */
   var CONTOURS = {
-    marginal: [[-217,194],[-147,204],[-51,166],[30,90],[86,15],[151,-48],[167,-103],[145,-131],[89,-132],[10,-87],[-78,-54],[-173,2],[-237,84],[-247,154]],
-    slight: [[-187,168],[-126,174],[-52,131],[-4,78],[20,27],[61,-2],[107,-40],[127,-80],[113,-100],[69,-92],[19,-58],[-20,-27],[-76,-18],[-140,13],[-202,72],[-213,132]],
-    enhanced: [[-167,148],[-119,149],[-60,112],[-29,64],[-24,31],[-36,15],[-70,10],[-124,26],[-177,73],[-188,119]],
-    moderate: [[-152,131],[-110,128],[-66,99],[-46,65],[-42,41],[-51,28],[-75,26],[-114,35],[-154,70],[-168,109]],
-    high: [[-136,115],[-106,109],[-74,88],[-65,66],[-61,52],[-67,44],[-82,44],[-105,46],[-134,71],[-148,99]]
+    marginal: [[-228,188],[-185,207],[-140,196],[-100,182],[-62,165],[-30,135],[0,112],[38,88],[70,72],[100,45],[138,15],[168,-25],[190,-70],[182,-112],[158,-140],[120,-150],[92,-132],[68,-140],[40,-118],[10,-88],[-25,-70],[-60,-62],[-95,-45],[-128,-22],[-160,0],[-198,38],[-225,92],[-236,145]],
+    slight: [[-195,170],[-150,182],[-110,170],[-80,150],[-55,125],[-25,85],[10,55],[50,32],[92,0],[125,-35],[142,-80],[125,-112],[95,-108],[70,-92],[45,-72],[15,-45],[-25,-32],[-70,-25],[-118,-6],[-162,28],[-195,78],[-212,128]],
+    enhanced: [[-185,125],[-160,150],[-125,152],[-100,135],[-78,112],[-55,92],[-42,68],[-55,52],[-82,50],[-110,42],[-140,48],[-168,75],[-183,100]],
+    moderate: [[-140,118],[-112,122],[-88,108],[-68,88],[-62,72],[-75,67],[-100,66],[-125,78],[-145,98]]
   };
 
   /* This whole circle lies inside the Slight area and outside every higher level.
      About 88% of ZIPs with a known boundary fit inside it at the fixed zoom. */
   var SAFE_RADIUS = 20;
+
+  /* Lakes larger than this crop the rainfall like ocean; see prepareBasemap. */
+  var CLIP_LAKE_KM2 = 10000;
 
   var DEFAULTS = {
     zip: "",
@@ -43,7 +50,10 @@
     basemapTimeoutMs: 25000,
     lookupTimeoutMs: 10000,
     allowZoomOut: true,
-    maxZoomOutSteps: 2,
+    /* Zoom stops the buttons move between; the map opens at ZOOM (7) and can
+       zoom out two steps. Zoom 4 (national) and 8 (closer) were tried and
+       dropped in favour of these. */
+    zoomLevels: [5, 6, 7],
     onZoom: null,
     onDone: null
   };
@@ -182,6 +192,25 @@
     ["land", "us", "lakes"].forEach(function (k) {
       raw[k] = raw[k].map(function (r) { return { r: r, b: bounds(r[0]) }; });
     });
+    /* Rainfall is cropped only at lakes above CLIP_LAKE_KM2, which in the US
+       means the Great Lakes. Cropping at every lake punched holes in the
+       outlook at Great Salt Lake, Okeechobee and reservoirs, which no
+       forecaster would draw. Smaller lakes still show beneath the rainfall. */
+    var ringKm2 = function (ring) {
+      var lat = 0, n = ring.length / 2, sum = 0;
+      for (var i = 1; i < ring.length; i += 2) lat += ring[i] / n;
+      var kx = 111.32 * Math.cos(lat * Math.PI / 180), ky = 110.57;
+      for (var j = 0; j < ring.length; j += 2) {
+        var k = (j + ring.length - 2) % ring.length;
+        sum += ring[j] * kx * ring[k + 1] * ky - ring[k] * kx * ring[j + 1] * ky;
+      }
+      return Math.abs(sum) / 2;
+    };
+    raw.clipLakes = raw.lakes.filter(function (o) {
+      var km2 = ringKm2(o.r[0]);
+      for (var h = 1; h < o.r.length; h++) km2 -= ringKm2(o.r[h]);
+      return km2 > CLIP_LAKE_KM2;
+    });
     return raw;
   }
 
@@ -286,7 +315,8 @@
     stroke(data.borders, "#555555", 1.1);
 
     /* This layer sits above the rainfall areas and repaints everything outside
-       the US, plus lakes, which crops the rainfall at water and the border. */
+       the US, plus the Great Lakes, which crops the rainfall at the coast,
+       the border and the Great Lakes shore. */
     g = layerCanvas(stage, 2);
     g.save();
     g.beginPath();
@@ -299,7 +329,7 @@
     g.fillRect(0, 0, W, H);
     fill(data.land, "#e0e0e0");
     g.restore();
-    fill(data.lakes, "#b8c8de", "nonzero");
+    fill(data.clipLakes, "#b8c8de", "nonzero");
     coastline();
     var cropStats = measureCrop(g);
     /* State lines are drawn above the rainfall areas so they stay prominent. */
@@ -401,10 +431,12 @@
 
   function overlaySvg(markerLabel, showMarker) {
     var tx = W / 2, ty = H / 2;
-    var contours = CATEGORIES.map(function (c) {
+    /* Only levels with a contour are drawn; the legend lists every level. */
+    var drawn = CATEGORIES.filter(function (c) { return CONTOURS[c.id]; });
+    var contours = drawn.map(function (c) {
       return '<path data-category="' + c.id + '" d="' + smoothPath(CONTOURS[c.id]) + '" fill="' + c.fill + '"/>';
     }).join("");
-    var outlines = CATEGORIES.map(function (c) {
+    var outlines = drawn.map(function (c) {
       return '<path d="' + smoothPath(CONTOURS[c.id]) + '" fill="none" stroke="' + c.line + '" stroke-width="2" vector-effect="non-scaling-stroke"/>';
     }).join("");
     var label = String(markerLabel).replace(/[&<>"]/g, function (ch) {
@@ -448,24 +480,34 @@
     stage.appendChild(layer.firstChild);
     if (opts.attribution) frame.appendChild(attribution);
 
-    /* Zoom-out controls. Rainfall areas scale with the map about its center. */
-    if (opts.allowZoomOut) {
-      var zoomNow = ZOOM, minUsed = ZOOM, clicks = 0;
+    /* Zoom controls step through opts.zoomLevels, starting at ZOOM. Rainfall
+       areas scale with the map about its center, so the respondent stays in
+       Slight at every level. */
+    var zoomStops = opts.zoomLevels.slice().sort(function (a, b) { return a - b; });
+    if (zoomStops.indexOf(ZOOM) < 0) {
+      zoomStops.push(ZOOM);
+      zoomStops.sort(function (a, b) { return a - b; });
+    }
+    if (opts.allowZoomOut && zoomStops.length > 1) {
+      var step = zoomStops.indexOf(ZOOM), minUsed = ZOOM, maxUsed = ZOOM, clicks = 0;
       var controls = make("div", "ero-zoom");
       var outButton = make("button", null, "\u2212"), inButton = make("button", null, "+");
       outButton.type = inButton.type = "button";
       outButton.setAttribute("aria-label", "Zoom out");
       inButton.setAttribute("aria-label", "Zoom back in");
-      inButton.disabled = true;
+      outButton.disabled = step === 0;
+      inButton.disabled = step === zoomStops.length - 1;
       controls.appendChild(inButton);
       controls.appendChild(outButton);
       frame.appendChild(controls);
-      var setZoom = function (next) {
-        zoomNow = next;
+      var setZoom = function (nextStep) {
+        step = nextStep;
+        var next = zoomStops[step];
         clicks++;
         if (next < minUsed) minUsed = next;
-        outButton.disabled = next <= ZOOM - opts.maxZoomOutSteps;
-        inButton.disabled = next >= ZOOM;
+        if (next > maxUsed) maxUsed = next;
+        outButton.disabled = step === 0;
+        inButton.disabled = step === zoomStops.length - 1;
         var k = Math.pow(2, next - ZOOM);
         var group = stage.querySelector(".ero-contours");
         group.setAttribute("transform", "translate(" + W / 2 + " " + H / 2 + ") scale(" + k + ")");
@@ -477,11 +519,11 @@
           drawBasemap(stage, map.data, place.lat, place.lon, opts.detail, next);
         });
         if (typeof opts.onZoom === "function") {
-          opts.onZoom({ zoomFinal: next, zoomMin: minUsed, zoomClicks: clicks, widthKm: Math.round(kmPerPixel(place.lat, next) * W) });
+          opts.onZoom({ zoomFinal: next, zoomMin: minUsed, zoomMax: maxUsed, zoomClicks: clicks, widthKm: Math.round(kmPerPixel(place.lat, next) * W) });
         }
       };
-      outButton.addEventListener("click", function () { setZoom(zoomNow - 1); });
-      inButton.addEventListener("click", function () { setZoom(zoomNow + 1); });
+      outButton.addEventListener("click", function () { setZoom(step - 1); });
+      inButton.addEventListener("click", function () { setZoom(step + 1); });
     }
 
     var legend = make("div", "ero-legend");
