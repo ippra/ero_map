@@ -5,13 +5,7 @@
 # in the full-detail condition sees. R only lays them out and marks the ZIP
 # centroid, which respondents never see.
 #
-# Setting rotation previews a rotated outlook without changing ero-map.js: the
-# rainfall layer is rotated about the map center after the widget draws it.
-# Clipping at water and borders is a separate layer drawn above it, so the
-# preview clips exactly as a rotated widget would.
-#
-# Output: 01_example_maps.png in the project folder, or
-# 01_example_maps_rot<degrees>.png for a rotated preview.
+# Output: 01_example_maps.png in the project folder.
 
 library(dplyr)
 library(tibble)
@@ -32,22 +26,6 @@ if (!file.exists(chrome_path)) {
 
 project_dir <- here::here()
 detail <- "full"
-
-# Degrees clockwise. 0 is the current design, with the highest-risk area
-# southwest of center; 90 puts it northwest, the best orientation found by
-# 02_orientation_clipping.R.
-rotation <- 90
-rotation_label <- c(
-  "0" = "current orientation, highest-risk area southwest of center",
-  "90" = "rotated 90°, highest-risk area northwest of center",
-  "180" = "rotated 180°, highest-risk area northeast of center",
-  "270" = "rotated 270°, highest-risk area southeast of center"
-)[[as.character(rotation)]]
-output_name <- if_else(
-  rotation == 0,
-  "01_example_maps.png",
-  paste0("01_example_maps_rot", rotation, ".png")
-)
 
 # Spread across regions and settlement types: large metros, a suburb, small
 # cities and rural towns, interior, coastal, Great Lakes and border. Listed
@@ -145,8 +123,6 @@ writeLines(
     paste0("  detail: '", detail, "', baseUrl: '", widget_url, "',"),
     "  maxRetries: 0, allowZoomOut: true,",
     "  onDone: function (r) {",
-    "    document.querySelector('.ero-contours').setAttribute('transform',",
-    paste0("      'translate(320 240) rotate(", rotation, ")');"),
     "    document.getElementById('out').textContent =",
     "      'RESULT ' + JSON.stringify(r);",
     "  }",
@@ -303,10 +279,9 @@ example_plot <- pixel_data |>
   guides(colour = guide_legend(override.aes = list(size = 10), nrow = 1)) +
   labs(
     title = "What respondents see: example Excessive Rainfall Outlook maps",
-    subtitle = paste0(
-      "Full-detail condition (city names and highways); outlook ",
-      rotation_label, ". Hypothetical scenario created for research, not a ",
-      "real forecast."
+    subtitle = paste(
+      "Full-detail condition (city names and highways). Hypothetical",
+      "scenario created for research, not a real forecast."
     ),
     caption = paste(
       "Black dot marks the ZIP code centroid at the map center. It is shown",
@@ -330,7 +305,7 @@ example_plot <- pixel_data |>
   )
 
 ggsave(
-  file.path(project_dir, output_name),
+  file.path(project_dir, "01_example_maps.png"),
   example_plot,
   width = 30,
   height = 14.6,

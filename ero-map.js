@@ -18,14 +18,18 @@
      Listed outermost first and smoothed into closed curves when drawn.
      Moderate is the highest level drawn; the legend still shows all five.
      Shapes are irregular and off-center so they read as a hand-drawn outlook.
+     The outlook runs northwest-southeast with the highest risk northwest of
+     the respondent. Of 16 rotations and mirrorings tested, this one leaves
+     the least of the outlook cropped by ocean, Great Lakes and borders across
+     the lower-48 population (see 02_orientation_clipping.R).
      Constraints: each level lies inside the one below it, map center is at
      least SAFE_RADIUS inside Slight and outside Enhanced, and every point is
      within 240 px of center so the outlook fits the frame at 0 or 90 deg. */
   var CONTOURS = {
-    marginal: [[-228,188],[-185,207],[-140,196],[-100,182],[-62,165],[-30,135],[0,112],[38,88],[70,72],[100,45],[138,15],[168,-25],[190,-70],[182,-112],[158,-140],[120,-150],[92,-132],[68,-140],[40,-118],[10,-88],[-25,-70],[-60,-62],[-95,-45],[-128,-22],[-160,0],[-198,38],[-225,92],[-236,145]],
-    slight: [[-195,170],[-150,182],[-110,170],[-80,150],[-55,125],[-25,85],[10,55],[50,32],[92,0],[125,-35],[142,-80],[125,-112],[95,-108],[70,-92],[45,-72],[15,-45],[-25,-32],[-70,-25],[-118,-6],[-162,28],[-195,78],[-212,128]],
-    enhanced: [[-185,125],[-160,150],[-125,152],[-100,135],[-78,112],[-55,92],[-42,68],[-55,52],[-82,50],[-110,42],[-140,48],[-168,75],[-183,100]],
-    moderate: [[-140,118],[-112,122],[-88,108],[-68,88],[-62,72],[-75,67],[-100,66],[-125,78],[-145,98]]
+    marginal: [[-188,-228],[-207,-185],[-196,-140],[-182,-100],[-165,-62],[-135,-30],[-112,0],[-88,38],[-72,70],[-45,100],[-15,138],[25,168],[70,190],[112,182],[140,158],[150,120],[132,92],[140,68],[118,40],[88,10],[70,-25],[62,-60],[45,-95],[22,-128],[0,-160],[-38,-198],[-92,-225],[-145,-236]],
+    slight: [[-170,-195],[-182,-150],[-170,-110],[-150,-80],[-125,-55],[-85,-25],[-55,10],[-32,50],[0,92],[35,125],[80,142],[112,125],[108,95],[92,70],[72,45],[45,15],[32,-25],[25,-70],[6,-118],[-28,-162],[-78,-195],[-128,-212]],
+    enhanced: [[-125,-185],[-150,-160],[-152,-125],[-135,-100],[-112,-78],[-92,-55],[-68,-42],[-52,-55],[-50,-82],[-42,-110],[-48,-140],[-75,-168],[-100,-183]],
+    moderate: [[-118,-140],[-122,-112],[-108,-88],[-88,-68],[-72,-62],[-67,-75],[-66,-100],[-78,-125],[-98,-145]]
   };
 
   /* This whole circle lies inside the Slight area and outside every higher level.

@@ -14,6 +14,17 @@ You need:
 
 The survey has this order: consent, ZIP code, recorded fields, random condition, first map with two questions, second map with up to three questions, debrief.
 
+## The map
+
+Every respondent sees the same outlook graphic, centered on their ZIP code, so their location always falls in the Slight (Level 2) area. Only the basemap underneath changes.
+
+- **Levels.** The legend shows all five levels, but the map draws only up to Moderate (Level 4). High (Level 5) stays an answer option.
+- **Shape.** The outlook runs northwest to southeast, with the highest risk northwest of the respondent. That orientation crops the least of the outlook at coasts and borders across the lower-48 population; `02_orientation_clipping.R` has the comparison.
+- **Clipping.** Rainfall stops at the ocean, the Great Lakes and the national border. Smaller lakes show faintly beneath it.
+- **Zoom.** The map opens at zoom 7 and can zoom out to 6 and 5.
+
+`01_example_maps.png` shows the map for 32 ZIP codes across the country.
+
 ## Part 1: Create the project
 
 1. At [qualtrics.ou.edu](https://qualtrics.ou.edu), click **Create a new project**, then **Survey**, then **Get started**.
@@ -397,6 +408,6 @@ A completed preview can appear as a recorded response, so delete test responses 
 - [ ] Fix the phone legend, where "Enhanced" and "Moderate" run together. At 343 px they were tight but separate; narrower phones or Qualtrics margins may merge them.
 - [ ] Decide how to handle phones. City and route labels render at about 6 px on a phone-width map, so the detail manipulation is weaker there. Options are restricting to desktop, enlarging labels on narrow maps, or analyzing by `ero_map_width_px`.
 - [ ] Review the route labels for your main sample areas.
-- [ ] Decide exclusion rules in advance for coastal and island ZIPs. Honolulu showed 2% of the rainfall area, and San Juan and Miami Beach had the center over water. A cutoff such as `ero_center_visible = yes` and `ero_rain_visible_pct >= 50` belongs in the analysis plan.
+- [ ] Decide exclusion rules in advance for coastal and island ZIPs. In the lower 48, about 4% of people would see less than half the outlook (`02_orientation_summary.csv`). Alaska, Hawaii and Puerto Rico are mostly water at this zoom, so a lower-48 sample avoids the worst cases. A cutoff such as `ero_center_visible = yes` and `ero_rain_visible_pct >= 50` belongs in the analysis plan.
 - [ ] If you use a panel, add ID capture and the end-of-survey redirect. Consider Qualtrics bot detection and duplicate prevention.
 - [ ] Stop changing the GitHub files before data collection, because changes reach respondents right away. If you must change them, update `MAP_VERSION` in Block B at the same time.

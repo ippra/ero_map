@@ -1,5 +1,10 @@
 # Would a different single orientation of the outlook be clipped less?
 #
+# This analysis chose the widget's orientation: the outlook was rotated from
+# its first design (highest risk southwest of the respondent, id 6 here) to
+# the current one (northwest, id 0), which crops the least for the lower-48
+# population.
+#
 # Every respondent sees the same graphic, rotated or mirrored the same way, so
 # the question is which one fixed orientation keeps the most rainfall visible
 # across lower-48 ZIPs once clipping at water and borders is applied.
@@ -248,7 +253,11 @@ orientation_data <- tibble(id = orientation_ids) |>
     bearing = (atan2(-core_y, core_x) * 180 / pi) %% 360,
     core_direction = compass_points[round(bearing / 45) %% 8 + 1],
     orientation = paste0(
-      if_else(id == 0, "Current: ", ""),
+      case_when(
+        id == 0 ~ "Current: ",
+        id == 6 ~ "Previous: ",
+        TRUE    ~ ""
+      ),
       "core ", core_direction,
       if_else(mirror, " (mirrored)", "")
     )
@@ -291,8 +300,9 @@ summary_data |>
 # By Region --------------------------------------------------------------------
 
 # Coarse bands, enough to show where each orientation wins and loses. Shown
-# for the current design, core NW (id 2), and the top three by population.
-region_ids <- union(c(0, 2), summary_data$id[1:3])
+# for the current design, the previous one (core SW, id 6), and the top three
+# by population.
+region_ids <- union(c(0, 6), summary_data$id[1:3])
 
 region_data <- long_data |>
   mutate(
