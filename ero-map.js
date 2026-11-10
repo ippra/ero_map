@@ -75,12 +75,16 @@
     ".ero-zoom button+button{border-top:1px solid #999}",
     ".ero-zoom button:disabled{color:#aaa;cursor:default}",
     ".ero-zoom button:focus-visible{outline:3px solid #0b5c8a;outline-offset:-3px}",
-    ".ero-legend{background:#fff;border:1px solid #bbb;margin:0 auto 6px;padding:6px 8px 8px;max-width:560px;box-sizing:border-box}",
+    ".ero-legend{background:#fff;border:1px solid #bbb;margin:0 auto 6px;padding:6px 8px 8px;max-width:560px;box-sizing:border-box;container-type:inline-size}",
     ".ero-legend-title{font-size:14px;font-weight:700;text-align:center;margin:0 0 4px}",
-    ".ero-levels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:0;padding:0;list-style:none}",
+    /* Phone legends are too narrow for 12px bold level names: "Enhanced" ran
+       into "Moderate" below about 315px. The text shrinks with the legend
+       width (cqi) so the widest name fits its column; browsers without
+       container units keep the 12px declared first. */
+    ".ero-levels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;gap:min(6px,1.2cqi);margin:0;padding:0;list-style:none}",
     ".ero-levels li{margin:0;padding:0;text-align:center;min-width:0}",
-    ".ero-levels span{display:block;font-size:12px;font-weight:700;color:#555;margin:0 0 2px}",
-    ".ero-levels b{display:block;font-size:12px;border:2px solid;padding:4px 1px;box-sizing:border-box}",
+    ".ero-levels span{display:block;font-size:12px;font-size:min(12px,calc((100cqi - 24px) / 25));font-weight:700;color:#555;margin:0 0 2px;white-space:nowrap}",
+    ".ero-levels b{display:block;font-size:12px;font-size:min(12px,calc((100cqi - 24px) / 25));border:2px solid;padding:4px 1px;box-sizing:border-box;white-space:nowrap}",
     ".ero-form{margin:0;padding:12px;border:1px solid #9aa5b1;background:#f5f7fa}",
     ".ero-form label{display:block;font-size:15px;margin:0 0 8px}",
     ".ero-form input{font-size:16px;padding:6px 8px;width:7em;margin:0 8px 0 0;box-sizing:border-box}",
