@@ -11,6 +11,7 @@ Map code and public data for a survey experiment on Excessive Rainfall Outlook m
 | `basemap.js`, `zips/` | Basemap geometry and the ZIP code lookup, loaded by the widget. |
 | `test.html` | Preview of the map as it appears in the survey. Enter a ZIP code and pick a condition. |
 | `test-es.html` | The same preview using `ero-map-es.js`. |
+| `qualtrics_spanish/` | Paste-ready Qualtrics JavaScript and map containers for the Spanish survey, with a README. `ero_map_spanish_qualtrics.zip` is the same folder zipped for sending. |
 | `ERO_Map_Qualtrics_Setup_Guide.md` | How to build the survey in Qualtrics, the recorded fields, and the test checklist. |
 | `01_example_maps.R` | Renders `01_example_maps.png`: the map for 32 ZIP codes on one page. |
 | `02_orientation_clipping.R`, `.js` | Measures how much of the outlook coasts and borders crop under 16 orientations, weighted by 2020 population. Writes `02_orientation_summary.csv`. |
