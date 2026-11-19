@@ -7,13 +7,15 @@ Map code and public data for a survey experiment on Excessive Rainfall Outlook m
 | File | What it is |
 | --- | --- |
 | `ero-map.js` | The map widget the survey loads. `EROMap.mount(container, options)`; no dependencies. |
+| `ero-map-es.js` | Spanish version of `ero-map.js`: same map, Spanish title, legend, level names and ZIP prompts. Uses the same `basemap.js` and `zips/`. Changes to the map itself must be made in both files. |
 | `basemap.js`, `zips/` | Basemap geometry and the ZIP code lookup, loaded by the widget. |
 | `test.html` | Preview of the map as it appears in the survey. Enter a ZIP code and pick a condition. |
+| `test-es.html` | The same preview using `ero-map-es.js`. |
 | `ERO_Map_Qualtrics_Setup_Guide.md` | How to build the survey in Qualtrics, the recorded fields, and the test checklist. |
 | `01_example_maps.R` | Renders `01_example_maps.png`: the map for 32 ZIP codes on one page. |
 | `02_orientation_clipping.R`, `.js` | Measures how much of the outlook coasts and borders crop under 16 orientations, weighted by 2020 population. Writes `02_orientation_summary.csv`. |
 
-The R scripts need R, Google Chrome, and a `CENSUS_API_KEY` in `~/.Renviron` (for `02`). Changes pushed to `ero-map.js`, `basemap.js` or `zips/` reach survey respondents immediately through GitHub Pages.
+The R scripts need R, Google Chrome, and a `CENSUS_API_KEY` in `~/.Renviron` (for `02`). Changes pushed to `ero-map.js`, `ero-map-es.js`, `basemap.js` or `zips/` reach survey respondents immediately through GitHub Pages.
 
 ## Sources
 
