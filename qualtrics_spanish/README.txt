@@ -26,4 +26,4 @@ Do not type the HTML into the regular text box; use HTML View, or it shows
 up as plain text.
 
 Embedded data fields are the same as in the English survey. In the Spanish
-data, ero_map_version is "2026-11-19-es".
+data, ero_map_version is "2026-11-20-es".

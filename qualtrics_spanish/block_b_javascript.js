@@ -2,7 +2,7 @@ Qualtrics.SurveyEngine.addOnReady(function () {
   var HOST = "https://ippra.github.io/ero_map/";
   // Change this whenever the files on GitHub change, so responses can be
   // matched to the map version they saw.
-  var MAP_VERSION = "2026-11-19-es";
+  var MAP_VERSION = "2026-11-20-es";
 
   var question = this;
   var root = document.getElementById("ero-map-root");

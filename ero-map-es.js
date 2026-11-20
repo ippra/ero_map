@@ -9,10 +9,10 @@
 
   var CATEGORIES = [
     { id: "marginal", name: "M\u00ednimo", level: 1, fill: "#a0c587", line: "#4f7a3a", text: "#000000" },
-    { id: "slight", name: "Leve", level: 2, fill: "#f9e070", line: "#c9a640", text: "#000000" },
-    { id: "enhanced", name: "Elevado", level: 3, fill: "#f19c38", line: "#b5651d", text: "#000000" },
-    { id: "moderate", name: "Moderado", level: 4, fill: "#d9453c", line: "#9c2a23", text: "#ffffff" },
-    { id: "high", name: "Alto", level: 5, fill: "#c826e8", line: "#a01fc0", text: "#ffffff" }
+    { id: "slight", name: "Bajo", level: 2, fill: "#f9e070", line: "#c9a640", text: "#000000" },
+    { id: "enhanced", name: "Moderado", level: 3, fill: "#f19c38", line: "#b5651d", text: "#000000" },
+    { id: "moderate", name: "Alto", level: 4, fill: "#d9453c", line: "#9c2a23", text: "#ffffff" },
+    { id: "high", name: "Extremo", level: 5, fill: "#c826e8", line: "#a01fc0", text: "#ffffff" }
   ];
 
   /* Contour control points, in pixels relative to map center.
